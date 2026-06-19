@@ -1,0 +1,48 @@
+- name: Refresh apt cache and install common packages
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create the student account needed for the gradebook path
+  ansible.builtin.user:
+    name: student
+    shell: /usr/sbin/nologin
+    password_lock: true
+    create_home: true
+
+- name: Create gradebook file
+  ansible.builtin.copy:
+    content: "{{ variant_number }}\n"
+    dest: /home/student/gradebook
+    owner: student
+    group: student
+    mode: '0644'
+
+- name: Create teacher account with password-based sudo
+  ansible.builtin.user:
+    name: teacher
+    groups: sudo
+    append: true
+    shell: /bin/bash
+    password: "{{ teacher_password_hash }}"
+    update_password: on_create
+    create_home: true
+
+- name: Verify a database password was supplied from the environment
+  ansible.builtin.assert:
+    that:
+      - db_password | length > 0
+    fail_msg: Export MYWEBAPP_DB_PASSWORD before running ansible-playbook.
+
+- name: Enable password authentication for teacher and operator demonstration accounts
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-lab4-password-auth.conf
+    content: |
+      PasswordAuthentication yes
+      KbdInteractiveAuthentication no
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart SSH

@@ -1,0 +1,25 @@
+#cloud-config
+hostname: worker
+manage_etc_hosts: true
+package_update: true
+packages:
+  - python3
+  - python3-apt
+  - qemu-guest-agent
+users:
+  - default
+  - name: ansible
+    gecos: Ansible automation
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+write_files:
+  - path: /etc/motd
+    permissions: '0644'
+    content: |
+      mywebapp Lab 4 worker node. Database node: ${db_ip}

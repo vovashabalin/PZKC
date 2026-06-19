@@ -1,0 +1,10 @@
+version: 2
+ethernets:
+  ens3:
+    addresses:
+      - ${db_ip}/24
+    routes:
+      - to: default
+        via: ${gateway_ip}
+    nameservers:
+      addresses: [${gateway_ip}]

@@ -1,0 +1,5 @@
+# Managed by Ansible for mywebapp Lab 4. Local Unix-socket access remains valid.
+local   all             postgres                                peer
+local   all             all                                     peer
+host    {{ db_name }}    {{ db_user }}    {{ hostvars['worker'].ansible_host }}/32   scram-sha-256
+host    {{ db_name }}    {{ db_user }}    {{ ansible_host }}/32                       scram-sha-256

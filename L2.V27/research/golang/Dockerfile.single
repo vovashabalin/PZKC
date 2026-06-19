@@ -1,0 +1,8 @@
+# Build from L2.V27/research/work/golang:
+# docker build -f ../../golang/Dockerfile.single -t lab2-go-single .
+FROM golang:1.24-bookworm
+WORKDIR /src
+COPY . .
+RUN go build -o /usr/local/bin/fizzbuzz .
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/fizzbuzz", "serve"]

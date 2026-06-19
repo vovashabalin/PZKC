@@ -1,0 +1,24 @@
+[Unit]
+Description=mywebapp Notes Service
+Requires=mywebapp.socket
+After=network-online.target postgresql.service mywebapp.socket
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=app
+Group=app
+WorkingDirectory=/opt/mywebapp/app
+Environment=CONFIG_PATH=/etc/mywebapp/config.toml
+ExecStartPre=/opt/mywebapp/venv/bin/python /opt/mywebapp/app/migrate.py --config /etc/mywebapp/config.toml
+ExecStart=/opt/mywebapp/venv/bin/gunicorn --workers 2 --access-logfile - --error-logfile - wsgi:app
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadOnlyPaths=/etc/mywebapp
+
+[Install]
+WantedBy=multi-user.target

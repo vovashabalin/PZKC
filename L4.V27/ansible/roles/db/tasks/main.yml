@@ -1,0 +1,40 @@
+- name: Install PostgreSQL server and Python driver
+  ansible.builtin.apt:
+    name: "{{ postgresql_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Configure PostgreSQL listen address for the private database node
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    regexp: "^#?listen_addresses\\s*="
+    line: "listen_addresses = '{{ ansible_host }}'"
+  notify: Restart PostgreSQL
+
+- name: Restrict PostgreSQL clients to worker and database nodes
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  notify: Restart PostgreSQL
+
+- name: Apply pending PostgreSQL configuration changes before database operations
+  ansible.builtin.meta: flush_handlers
+
+- name: Create database user
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    encrypted: true
+    state: present
+
+- name: Create application database
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+    state: present

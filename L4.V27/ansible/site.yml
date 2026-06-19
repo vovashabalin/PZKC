@@ -1,0 +1,17 @@
+- name: Common baseline on all laboratory nodes
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: PostgreSQL database node
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Worker node with mywebapp and nginx
+  hosts: workers
+  become: true
+  roles:
+    - web

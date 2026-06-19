@@ -1,0 +1,3 @@
+# The operator account may only control the application through this fixed wrapper
+# and reload nginx. Passwordless sudo is intentional for the laboratory role.
+operator ALL=(root) NOPASSWD: /usr/local/sbin/mywebapp-control start, /usr/local/sbin/mywebapp-control stop, /usr/local/sbin/mywebapp-control restart, /usr/local/sbin/mywebapp-control status, /usr/bin/systemctl reload nginx.service

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+systemctl is-active --quiet mywebapp-container.service
+systemctl is-active --quiet nginx.service
+nginx -t
+
+curl --fail --silent --show-error -H 'Accept: text/html' http://127.0.0.1/ >/dev/null
+curl --fail --silent --show-error -H 'Accept: application/json' http://127.0.0.1/notes >/dev/null
+
+# nginx must not publish health endpoints.
+status="$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1/health/alive)"
+[[ "$status" == "404" ]]
+
+container_id="$(docker compose --project-directory /opt/mywebapp --env-file /etc/mywebapp/container.env ps -q app)"
+[[ -n "$container_id" ]]
+docker exec "$container_id" python - <<'PY'
+from urllib.request import urlopen
+for endpoint in ('/health/alive', '/health/ready'):
+    response = urlopen(f'http://127.0.0.1:3000{endpoint}', timeout=3)
+    assert response.status == 200
+    assert response.read().decode() == 'OK'
+print('Container health checks passed')
+PY
+
+echo "Target verification passed."

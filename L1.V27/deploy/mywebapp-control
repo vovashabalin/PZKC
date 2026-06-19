@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: mywebapp-control {start|stop|restart|status}" >&2
+  exit 64
+fi
+
+case "$1" in
+  start)
+    systemctl start mywebapp.socket
+    curl --fail --silent --show-error --max-time 15 http://127.0.0.1:3000/health/alive >/dev/null
+    ;;
+  stop)
+    systemctl stop mywebapp.socket
+    systemctl stop mywebapp.service || true
+    ;;
+  restart)
+    systemctl stop mywebapp.socket
+    systemctl stop mywebapp.service || true
+    systemctl start mywebapp.socket
+    curl --fail --silent --show-error --max-time 15 http://127.0.0.1:3000/health/alive >/dev/null
+    ;;
+  status)
+    systemctl status mywebapp.socket mywebapp.service
+    ;;
+  *)
+    echo "Usage: mywebapp-control {start|stop|restart|status}" >&2
+    exit 64
+    ;;
+esac

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Installed by target-bootstrap.sh. Runs as root through a narrow sudo rule.
+set -euo pipefail
+
+release_dir="${1:?Usage: mywebapp-deploy RELEASE_DIR}"
+[[ -d "$release_dir" ]] || { echo "Release directory does not exist." >&2; exit 2; }
+
+install -d -m 0750 /opt/mywebapp
+install -d -m 0750 /etc/mywebapp
+install -m 0644 "$release_dir/docker-compose.yml" /opt/mywebapp/docker-compose.yml
+install -m 0644 "$release_dir/config.toml" /opt/mywebapp/config.toml
+install -m 0644 "$release_dir/mywebapp-container.service" /etc/systemd/system/mywebapp-container.service
+install -m 0644 "$release_dir/mywebapp.conf" /etc/nginx/conf.d/mywebapp.conf
+install -m 0600 "$release_dir/container.env" /etc/mywebapp/container.env
+
+systemctl daemon-reload
+systemctl restart mywebapp-container.service
+nginx -t
+systemctl reload nginx.service

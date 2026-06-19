@@ -1,0 +1,28 @@
+- name: Verify worker and database deployment
+  hosts: workers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Verify the application is ready through localhost
+      ansible.builtin.uri:
+        url: http://127.0.0.1:3000/health/ready
+        return_content: true
+        status_code: 200
+      register: ready
+
+    - name: Assert ready response body
+      ansible.builtin.assert:
+        that:
+          - ready.content == 'OK'
+
+    - name: Verify nginx public root endpoint
+      ansible.builtin.uri:
+        url: http://127.0.0.1/
+        headers:
+          Accept: text/html
+        status_code: 200
+
+    - name: Verify nginx does not expose health endpoint
+      ansible.builtin.uri:
+        url: http://127.0.0.1/health/alive
+        status_code: 404

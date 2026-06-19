@@ -1,0 +1,9 @@
+# Alpine variant. Some binary packages can build from source due to musl.
+FROM python:3.12-alpine
+WORKDIR /app
+COPY requirements/backend.lock requirements/backend.lock
+RUN python -m pip install --no-cache-dir -r requirements/backend.lock
+COPY spaceship spaceship
+COPY build build
+EXPOSE 8080
+CMD ["uvicorn", "spaceship.main:app", "--host", "0.0.0.0", "--port", "8080"]

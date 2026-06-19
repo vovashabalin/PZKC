@@ -1,0 +1,19 @@
+[Unit]
+Description=mywebapp container stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mywebapp
+EnvironmentFile=/etc/mywebapp/container.env
+ExecStartPre=/usr/bin/docker compose --env-file /etc/mywebapp/container.env pull
+ExecStart=/usr/bin/docker compose --env-file /etc/mywebapp/container.env up -d --remove-orphans
+ExecStop=/usr/bin/docker compose --env-file /etc/mywebapp/container.env down
+TimeoutStartSec=180
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target

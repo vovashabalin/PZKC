@@ -1,0 +1,12 @@
+# No password is committed. Export MYWEBAPP_DB_PASSWORD before running playbooks.
+variant_number: 27
+app_port: 3000
+db_port: 5432
+db_name: mywebapp
+db_user: mywebapp
+db_password: "{{ lookup('ansible.builtin.env', 'MYWEBAPP_DB_PASSWORD') }}"
+postgresql_version: '16'
+teacher_password_hash: >-
+  $6$lab4teacher$/ac7MAZYTYxLGFLCQlj5FQXveYVYfkVqp5jJMytmeETBC.03h3MNR.wJ3HaFmGjWax59ao3QWZ1GmsCNxfWC70
+operator_password_hash: >-
+  $6$lab4operator$JJog3qU0gzjTjPKglqR/ObfwGl1d2ikQj/yqA2NlquV9.QZd6MdduU9WFqcjqimAWzYxQ6U1el/t32Gpq6hy71
